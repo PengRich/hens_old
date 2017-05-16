@@ -3,6 +3,8 @@
 import argparse
 
 from py.utils import Util, ShowAnything
+from py.debug import Debug
+
 
 
 class management(object):
@@ -23,4 +25,5 @@ class management(object):
 
 
 if __name__ == "__main__":
-    management().run()
+    # management().run()
+    d = Debug().run("workspace/example.f90")

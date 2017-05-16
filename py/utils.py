@@ -38,6 +38,23 @@ class Util(object):
     def __init__(self):
         pass
 
+    @staticmethod
+    def read_json(filename):
+        """
+        Parameter:
+            filename: str, e.g. 'alert/subalerts/rules/apar_rules.json'
+
+        Return:
+            json format data, dict
+        """
+        with open(filename, "rb") as r:
+            return json.load(r)
+
+    @staticmethod
+    def write_json(filename, data):
+        with open(filename, "wb") as w:
+            json.dump(data, w)
+
 
 class ShowAnything(object):
 
