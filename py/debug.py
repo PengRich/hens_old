@@ -45,6 +45,8 @@ class Debug(object):
 
     def run(self, filename):
 
+        if not filename: filename = self.info["run"]
+
         objs = map(lambda x: os.path.join("obj", os.path.split(x)[-1]),
                    self.info["compile"])
         objs = " " + " ".join([i.replace("f90", "o") for i in objs]) + " "
