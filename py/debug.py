@@ -56,9 +56,10 @@ class Debug(object):
             objs+filename+ " -o debug/"+exc
         res  = commands.getstatusoutput(cmd)
         Util.logger.info([res, cmd])
-        cmd = "debug/" + exc
-        Util.logger.info("RESULTS:")
-        os.system(cmd)
+        if res[0] == 0:
+            cmd = "debug/" + exc
+            Util.logger.info("RESULTS:")
+            os.system(cmd)
 
     def _mv_objs(self):
         files = os.listdir(self.path)
