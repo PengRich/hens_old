@@ -25,14 +25,16 @@ class management(object):
         # debug
         add("-d", "--Debug", help="debug")
         # list debug logic
-        add("-L", "--Logic", nargs="?", const=True, default=True,
+        add("-L", "--Logic", nargs="?", const=True, default=False,
             help="list compile logic")
 
         args   = parser.parse_args()
-        if args.List: self.sh.list_obj(args.List)
+        # if args.List: self.sh.list_obj(args.List)
 
         if isinstance(args.Compile, list): self.db.Compile(args.Compile)
         if args.Debug: self.db.run(args.Debug)
+
+        if args.Logic: self.sh.list_obj("json/debug.json")
 
 
 if __name__ == "__main__":

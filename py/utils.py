@@ -1,6 +1,9 @@
 # coding=utf-8
+from __future__ import unicode_literals
+from treelib import Tree
 import logging
 import json
+import os
 
 
 LOG_LEVEL  = "debug"
@@ -60,25 +63,69 @@ class ShowAnything(object):
 
     def __init__(self):
         # ignore
-        self.perfix = [".", "PyX", "PyO", "bin", "lib", "include"]
-        self.suffix = [".swp"]
+        self.perfix = [".", "PyX", "PyO", "bin", "lib", "include", "__"]
+        self.suffix = [".swp", ".pyc"]
+        self.branch = 1
+        self.data   = {}
+
+    def _explore_data(self, data, parent):
+
+        if isinstance(data, list):
+            for i in data:
+                self.branch += 1
+                self.tree.create_node(i, self.branch, parent=parent)
+
+        if isinstance(data, dict):
+            for i, j in data.iteritems():
+                self.tree.create_node(i, self.branch, parent=parent)
+                self._explore_data(j, self.branch)
+                self.branch += 1
 
     def list_obj(self, name):
 
         # m.lower().endswith(('.png', '.jpg', '.jpeg'))
         if name.lower().endswith('.json'): self.json_file(name)
+        self.tree = Tree()
+        self.tree.create_node(os.path.split(name)[-1].split(".")[0], 0)
+        self._explore_data(self.data, 0)
+        self.tree.show(line_type="ascii-emv")
 
     def json_file(self, name):
+
         try:
-            with open(name, "rb") as r:
-                data = json.load(r)
+            data = Util.read_json(name)
         except Exception, e:
             Util.logger.info(e)
             return None
-        print data
-        print json.dumps(data, indent=4, sort_keys=True)
 
-    def folder(self):
-        pass
+        del data["mod"]
+        del data["mod_map_file"]
+        del data["obj"]
+        self.data = data
+        # print json.dumps(data, indent=4, sort_keys=True)
+
+    def folder(self, path):
+        filenames = os.listdir(path)
+
+        for i in self.perfix:
+            filenames = [j for j in filenames if not j.startswith(i)]
+        for i in self.suffix:
+            filenames = [j for j in filenames if not j.endswith(i)]
+
+        for name in filenames:
+            self.data[name] = {}
+            if os.path.isdir(os.path.join(path, name)):
+                self.folder(os.path.join(path, name))
+        # for name in sorted(filenames):
+        #     data.append({"name": name, "parent": parent, "branch": branch})
+        #     branch += 1
+        #     if os.path.isdir(os.path.join(path, folder, name)):
+        #         data, branch = \
+        #             self.explore_folders(os.path.join(path, folder), name,
+        #                                  branch-1, branch, data)
+
+        # return data, branch
 
 
+if __name__ == "__main__":
+    ShowAnything().list_obj("json/debug.json")
