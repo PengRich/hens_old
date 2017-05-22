@@ -12,7 +12,7 @@ module hen
     real(kind=8)    :: T_cin, T_cout
     real(kind=8)    :: K_he, K_hs_hu, K_hs_cu, K_cs_hu, K_cs_cu
     real(kind=8)    :: Q, A_he, A_hu, A_cu
-    integer(kind=4) :: ex
+    integer(kind=4) :: ex, tag
   end type exchanger
 
   type, public :: utility
@@ -20,7 +20,7 @@ module hen
     real(kind=8)    :: T_in, T_out
     real(kind=8)    :: K_hu, K_cu
     real(kind=8)    :: Q, A
-    integer(kind=4) :: ex
+    integer(kind=4) :: ex 
 
   end type utility
 
@@ -64,7 +64,6 @@ module flexible_utility
       type(exchanger) :: new
 
       if(he%Q .gt. 0.d0) then
-
         dtl = he%T_hin - he%T_cout
         dtr = he%T_hout - he%T_cin
         if(dtl.gt.0.d0 .and. dtr.gt.0.d0) then
