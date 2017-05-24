@@ -37,19 +37,29 @@ class Debug(object):
         mod_path = os.path.join(self.path, "mod")
         inc_path = os.path.join(self.path, "inc")
         for f in self.info["compile"]:
-            cmd = "gfortran -J "+self.mod_path+" -I "+self.inc_path+" -c "+f
+            obj = "-".join(os.path.split(f[4:].replace("f90", "o")))
+            if obj[0] == "-": obj = obj[1:]
+            cmd = "gfortran -J "+self.mod_path+" -I "+self.inc_path+\
+                " -c "+f+" -o "+ os.path.join("obj", obj)
             res = commands.getstatusoutput(cmd)
             Util.logger.info([res, cmd])
 
-        self._mv_objs()
+        # self._mv_objs()
 
     def run(self, filename):
 
         if not filename: filename = self.info["run"]
 
-        objs = map(lambda x: os.path.join("obj", os.path.split(x)[-1]),
-                   self.info["compile"])
-        objs = " " + " ".join([i.replace("f90", "o") for i in objs]) + " "
+        objs = []
+        for f in self.info["compile"]:
+            obj = "-".join(os.path.split(f[4:].replace("f90", "o")))
+            if obj[0] == "-": obj = obj[1:]
+            objs.append(os.path.join("obj", obj))
+        objs = " " + " ".join(objs) + " "
+
+        # objs = map(lambda x: os.path.join("obj", os.path.split(x)[-1]),
+        #            self.info["compile"])
+        # objs = " " + " ".join([i.replace("f90", "o") for i in objs]) + " "
 
         exc = os.path.split(filename)[-1].split(".")[0]
         cmd  = "gfortran -J "+self.mod_path+" -I "+self.inc_path+" "+\
