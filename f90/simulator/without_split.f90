@@ -15,16 +15,13 @@ module simulator_without_split
     !**********************************************
     ! initialize
     !**********************************************
-    subroutine init_tac(Qs)
+    subroutine init_tac()
       implicit none
-      real(kind=8) :: Qs(n_he)
-
-      results = cost(0.d0, 0.d0, 0.d0, 0.d0, global_pen)
         
       do id=1, n_he
-        if(abs(Qs(id)) .gt. 1.d-3) then 
+        if(abs(Q_hes(id)) .gt. 1.d-3) then 
           hesp(id)%ex   = 1
-          hesp(id)%Q    = Qs(id)
+          hesp(id)%Q    => Q_hes(id)
           hesp(id)%A_he = 0.d0 
           hesp(id)%A_hu = 0.d0 
           hesp(id)%A_cu = 0.d0 
@@ -81,6 +78,7 @@ module simulator_without_split
           hesp(loc(i, k))%T_cout = hesp(loc(i, k))%T_cin + &
               hesp(loc(i, k))%Q/hesp(loc(i, k))%cs%HCpF
         enddo
+        
       enddo
 
       return 
@@ -159,6 +157,8 @@ module simulator_without_split
     subroutine cal_tac()
       implicit none
 
+      results = cost(0.d0, 0.d0, 0.d0, 0.d0, global_pen)
+
       do i=1, n_hs
 
         if(sizes(i).eq.0) cycle
@@ -194,25 +194,25 @@ module simulator_without_split
       results%huc = Q_hu(1) * expen%fac_hu
 
       global_pen = 0.d0
+      Q_hu = 0.d0
+      Q_cu = 0.d0
 
     end subroutine cal_tac
 
     !*******************************
     ! external call tac
     !*******************************
-    real(kind=8) function tac(Qs)
+    real(kind=8) function tac()
       implicit none
-      real(kind=8) :: Qs(n_he)
       
-      call init_tac(Qs)
+      call init_tac()
 
-      tac = tac_with_topo(Qs) 
+      tac = tac_with_topo() 
  
     end function tac
 
-    real(kind=8) function tac_with_topo(Qs)
+    real(kind=8) function tac_with_topo()
       implicit none
-      real(kind=8) :: Qs(n_he)
       
       call cal_unit_temp()
       call cal_internal_area_utility()

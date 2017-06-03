@@ -5,7 +5,6 @@ do k=1, n_st
       hes(j,i,k)%cs      = streams(n_hs+j)
       hes(j,i,k)%hu      = streams(n_s+1)
       hes(j,i,k)%cu      = streams(n_s+2)
-      hes(j,i,k)%Q       = 0.d0
       hes(j,i,k)%A_he    = 0.d0
       hes(j,i,k)%A_hu    = 0.d0
       hes(j,i,k)%A_cu    = 0.d0

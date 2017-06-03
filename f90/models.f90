@@ -7,12 +7,15 @@ module hen
   end type stream
 
   type, public :: exchanger
-    type(stream)    :: hs, cs, hu, cu
-    real(kind=8)    :: T_hin, T_hout
-    real(kind=8)    :: T_cin, T_cout
-    real(kind=8)    :: K_he, K_hs_hu, K_hs_cu, K_cs_hu, K_cs_cu
-    real(kind=8)    :: Q, A_he, A_hu, A_cu
+    type(stream) :: hs, cs, hu, cu
+    real(kind=8) :: T_hin, T_hout
+    real(kind=8) :: T_cin, T_cout
+    real(kind=8) :: K_he, K_hs_hu, K_hs_cu, K_cs_hu, K_cs_cu
+    real(kind=8) :: A_he, A_hu, A_cu
+
     integer(kind=4) :: ex, tag, h_id, c_id
+
+    real(kind=8), pointer :: Q
   end type exchanger
 
   type, public :: utility

@@ -16,9 +16,9 @@ module hens_def
   type(stream),    public :: streams(n_hs+n_cs+n_hu+n_cu)
   type(expense),   public :: expen
   type(cost),      public :: results 
-  real(kind=8),    public :: Q_hes(n_he)=0.d0
   real(kind=8),    public :: Q_hu(n_hu)=0.d0, Q_cu(n_cu)=0.d0
 
+  real(kind=8), target, public :: Q_hes(n_he)=0.d0
   type(exchanger), target,  public :: hes(n_cs, n_hs, n_st)
   type(utility),   target,  public :: utilities(n_hs+n_cs)
   type(exchanger), pointer, public :: hesp(:)

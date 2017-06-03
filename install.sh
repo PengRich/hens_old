@@ -12,4 +12,6 @@ THE_USER=${SUDO_USER:-${USERNAME:-unknown}}
 # root_command_2
 # sudo -u ${THE_USER} normal_command_2
 
-ls
+virtualenv ./
+source bin/activate
+pip install -r requirements.txt
