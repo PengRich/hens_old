@@ -1,9 +1,12 @@
-module util
+!********************************
+! make formatted logs 
+!********************************
+module logger 
   implicit none
-  interface logger
-    module procedure log_char
-    module procedure log_real
-  end interface logger
+  ! interface logger
+  !   module procedure log_char
+  !   module procedure log_real
+  ! end interface logger
   contains
 
     subroutine log_char(message)
@@ -21,8 +24,11 @@ module util
       
     end subroutine log_real
 
-end module util
-        
+end module logger 
+
+!********************************
+! simplified penalty function 
+!********************************
 module penalty
   implicit none
   real(kind=8), parameter :: pen_factor=1.d7
@@ -40,6 +46,9 @@ module penalty
 end module penalty
 
 
+!********************************
+! kinds of random numbers
+!********************************
 module random_numbers
   implicit none
   real(kind=8)  :: rn=0.1d0

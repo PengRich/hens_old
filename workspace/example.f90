@@ -1,11 +1,26 @@
 program test
   use simulator_without_split 
-  call init 
+  call init_case
 
   ! test results, define 'Q_hes'
   ! include "9sp1_result.inc"
   include "10sp2_result.inc"
   print *, tac()
+  print *, simulated_result
+  stop
+      do i=1, n_hs
+        if(sizes(i).eq.0) cycle
+        do id=1, sizes(i)
+          print *, hesp(loc(i, id))%ex_he, hesp(loc(i, id))%ex_hu, hesp(loc(i, id))%ex_cu
+          print *, hesp(loc(i, id))%A_he, hesp(loc(i, id))%A_hu, hesp(loc(i, id))%A_cu
+        enddo
+      enddo
+      do i=1, n_hs+n_cs
+        print *, utip(i)%Q
+
+      enddo
+
+
   ! print *, y
   ! print *, results
   ! print *, sizes

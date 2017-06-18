@@ -43,13 +43,6 @@ class Util(object):
 
     @staticmethod
     def read_json(filename):
-        """
-        Parameter:
-            filename: str, e.g. 'alert/subalerts/rules/apar_rules.json'
-
-        Return:
-            json format data, dict
-        """
         with open(filename, "rb") as r:
             return json.load(r)
 

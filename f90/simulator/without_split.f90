@@ -1,39 +1,53 @@
 module simulator_without_split
   use hens_def
-  use flexible_utility
+  use flexible_utility_base
   implicit none
 
-  integer(kind=4) :: sizes(n_hs+n_cs)=0
+  integer(kind=4) :: sizes(n_hs+n_cs)
   integer(kind=4) :: loc(n_hs+n_cs, max(n_cs, n_hs)*n_st)
-  
+
+  private init_value
   private cal_unit_temp
   private cal_internal_area_utility
   private cal_terminal_area_utility
   private cal_tac
-
   contains
     !**********************************************
     ! initialize
     !**********************************************
+    subroutine init_value()
+      implicit none
+
+      global_pen = 0.d0
+      Q_hu       = 0.d0
+      Q_cu       = 0.d0
+    end subroutine init_value
+
     subroutine init_tac()
       implicit none
-        
-      do id=1, n_he
-        if(abs(Q_hes(id)) .gt. 1.d-3) then 
-          hesp(id)%ex   = 1
-          hesp(id)%Q    => Q_hes(id)
-          hesp(id)%A_he = 0.d0 
-          hesp(id)%A_hu = 0.d0 
-          hesp(id)%A_cu = 0.d0 
 
-          sizes(hesp(id)%h_id)      = sizes(hesp(id)%h_id) + 1
-          sizes(n_hs+hesp(id)%c_id) = sizes(n_hs+hesp(id)%c_id) + 1
+      sizes = 0
+      do k=1, n_st
+        do i=1, n_hs
+          do j=1, n_cs
+            id = (k-1)*n_hs*n_cs + (i-1)*n_cs + j
+            if(abs(Q_hes(i,j,k)) .gt. 1.d-3) then 
+              hesp(id)%ex_he   = 1
+              ! hesp(id)%Q    => Q_hes(i,j,k)
+              ! hesp(id)%A_he = 0.d0 
+              ! hesp(id)%A_hu = 0.d0 
+              ! hesp(id)%A_cu = 0.d0 
 
-          loc(hesp(id)%h_id, sizes(hesp(id)%h_id))           = id 
-          loc(n_hs+hesp(id)%c_id, sizes(n_hs+hesp(id)%c_id)) = id 
-        else
-           hesp(id)%ex   = 0
-        endif
+              sizes(i)      = sizes(i)      + 1
+              sizes(n_hs+j) = sizes(n_hs+j) + 1
+
+              loc(i, sizes(i))           = id 
+              loc(n_hs+j, sizes(n_hs+j)) = id 
+            else
+               hesp(id)%ex_he   = 0
+            endif
+          enddo
+        enddo
       enddo
 
       return
@@ -122,7 +136,7 @@ module simulator_without_split
           utip(i)%ex = 0
         endif
         utip(i)%Q  = Q
-        utip(i)%A  = 0.d0 
+        ! utip(i)%A  = 0.d0 
       enddo
 
       do j=1, n_cs
@@ -140,7 +154,7 @@ module simulator_without_split
           utip(i)%ex = 0
         endif
         utip(i)%Q  = Q
-        utip(i)%A  = 0.d0 
+        ! utip(i)%A  = 0.d0 
       enddo
 
       do k=1, n_hs+n_cs
@@ -157,25 +171,25 @@ module simulator_without_split
     subroutine cal_tac()
       implicit none
 
-      results = cost(0.d0, 0.d0, 0.d0, 0.d0, global_pen)
+      simulated_result = cost(0.d0, 0.d0, 0.d0, 0.d0, global_pen)
 
       do i=1, n_hs
 
         if(sizes(i).eq.0) cycle
 
         do id=1, sizes(i)
-          if(hesp(loc(i,id))%A_he .gt. 1.d-3) then
-            results%ac = results%ac + expen%fix_A + &
+          if(hesp(loc(i,id))%ex_he .eq. 1) then
+            simulated_result%ac = simulated_result%ac + expen%fix_A + &
                 expen%fac_A*hesp(loc(i,id))%A_he**expen%ex_A
           else
-            if(hesp(loc(i,id))%A_hu .gt. 1.d-3) then
+            if(hesp(loc(i,id))%ex_hu .eq. 1) then
               Q_hu(1) = Q_hu(1) + abs(hesp(loc(i,id))%Q)
-              results%ac = results%ac + expen%fix_A + &
+              simulated_result%ac = simulated_result%ac + expen%fix_A + &
                   expen%fac_A*hesp(loc(i,id))%A_hu**expen%ex_A
             endif
-            if(hesp(loc(i,id))%A_cu .gt. 1.d-3) then
+            if(hesp(loc(i,id))%ex_cu .eq. 1) then
                 Q_cu(1) = Q_cu(1) + abs(hesp(loc(i,id))%Q)
-                results%ac = results%ac + expen%fix_A + &
+                simulated_result%ac = simulated_result%ac + expen%fix_A + &
                     expen%fac_A*hesp(loc(i,id))%A_cu**expen%ex_A
             endif
           endif
@@ -185,17 +199,18 @@ module simulator_without_split
 
       do k=1, n_hs+n_cs
         if(utip(k)%ex .eq. 0) cycle
-        results%ac = results%ac + expen%fix_A + expen%fac_A*utip(k)%A**expen%ex_A
+        simulated_result%ac = simulated_result%ac + expen%fix_A + expen%fac_A*utip(k)%A**expen%ex_A
         Q_cu(1) = Q_cu(1) + max(0.d0, utip(k)%Q)
         Q_hu(1) = Q_hu(1) + abs(min(0.d0, utip(k)%Q))
       enddo
       
-      results%cuc = Q_cu(1) * expen%fac_cu
-      results%huc = Q_hu(1) * expen%fac_hu
+      simulated_result%cuc = Q_cu(1) * expen%fac_cu
+      simulated_result%huc = Q_hu(1) * expen%fac_hu
 
-      global_pen = 0.d0
-      Q_hu = 0.d0
-      Q_cu = 0.d0
+      ! global_pen = 0.d0
+      ! Q_hu = 0.d0
+      ! Q_cu = 0.d0
+      call init_value()
 
     end subroutine cal_tac
 
@@ -219,8 +234,8 @@ module simulator_without_split
       call cal_terminal_area_utility()
       call cal_tac()
 
-      tac_with_topo = results%ac + results%huc + results%cuc + results%pen
-      results%tac = tac_with_topo
+      tac_with_topo = simulated_result%ac + simulated_result%huc + simulated_result%cuc + simulated_result%pen
+      simulated_result%tac = tac_with_topo
  
     end function tac_with_topo
 
