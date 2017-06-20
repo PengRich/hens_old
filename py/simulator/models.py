@@ -10,21 +10,20 @@ class CostFactor(object):
 
     def __init__(self, f_cu, f_hu, f_A):
 
-        self.f_cu = float(f_cu)
-        self.f_hu = float(f_hu)
-        self.f_A  = map(float, f_A)
+        self.f_hu = {ID:float(v) for ID, v in f_hu.iteritems()}
+        self.f_cu = {ID:float(v) for ID, v in f_cu.iteritems()}
+        self.f_A = map(float, f_A)
 
 
 class Result(object):
 
-    def __init__(self, factors):
-        self.f = factors
+    def __init__(self, factor):
+        self.f_cu, self.f_hu, self.f_A = factor.f_cu, factor.f_hu, factor.f_A
         self._init()
 
     def _init(self):
 
-        self.tac = 0
-
+        self.tac     = 0
         self.cost_A  = 0
         self.cost_hu = 0
         self.cost_cu = 0
@@ -35,20 +34,16 @@ class Result(object):
         self.Q_hu = None
         self.Q_cu = None
 
-    def _update(self):
+    def _update(self, hu_tag=None, cu_tag=None):
+        if self.penalty:
+            self.tac = self.penalty
+            return
 
-        if self.A:
-            sta = 1 if self.A>1.e-3 else 0
-            self.cost_A = sta*self.f.f_A[0] + self.f.f_A[1]*(self.A**self.f.f_A[2])
-        else:
-            self.cost_A = 0
-
-        self.cost_hu  = self.f.f_hu*abs(self.Q_hu) if self.Q_hu else 0
-        self.cost_cu  = self.f.f_cu*abs(self.Q_cu) if self.Q_cu else 0
-
-        self.tac = sum([self.cost_A, self.cost_hu, self.cost_cu])
-
-        if self.penalty: self.tac += self.penalty
+        sta = 1 if self.A>1.e-3 else 0
+        self.cost_A  = sta*self.f_A[0] + self.f_A[1]*(self.A**self.f_A[2])
+        self.cost_hu = self.f_hu[hu_tag]*abs(self.Q_hu) if self.Q_hu else 0
+        self.cost_cu = self.f_cu[cu_tag]*abs(self.Q_cu) if self.Q_cu else 0
+        self.tac     = sum([self.cost_A, self.cost_hu, self.cost_cu])
 
 
 class Stream(object):
@@ -60,6 +55,7 @@ class Stream(object):
         self.HCpF  = float(HCpF) if HCpF else None
         self.h     = float(h)
         self.kind  = KINDS[str(kind)]
+        self.tag   = kind
 
         self.potential = abs((T_in-T_out)*HCpF) if HCpF else None
 
@@ -141,16 +137,18 @@ class FlexibleUtility(object):
                 if kind in HOT_UTILITIES:
                     self.utilities[kind].Q_hu = self.utilities[kind].Q
                     self.utilities[kind].Q_cu = None
+                    self.utilities[kind]._update(self.utilities[kind].hs.tag, None)
                 else:
                     self.utilities[kind].Q_hu = None
                     self.utilities[kind].Q_cu = self.utilities[kind].Q
+                    self.utilities[kind]._update(None, self.utilities[kind].cs.tag)
             else:
                 self.utilities[kind].A    = None
                 self.utilities[kind].Q_hu = None
                 self.utilities[kind].c_hu = None
                 self.utilities[kind].penalty = PEN(dtl) + PEN(dtr)
+                self.utilities[kind]._update(None, None)
 
-            self.utilities[kind]._update()
             if self.utilities[kind].tac < min_cost:
                 self.utility = self.utilities[kind]
                 min_cost     = self.utilities[kind].tac
@@ -176,7 +174,7 @@ class FlexibleExchanger(HeatExchanger):
             self.Q_hu = None
             self.C_hu = None
             self.penalty = None
-            self._update()
+            self._update(None, None)
         else:
             if self.Q > 0:
                 self.hsu.utilities = self.hsu.cus
@@ -227,9 +225,9 @@ class FlexibleUtilityHens(object):
         self.utilities  = []
 
         # hens investment and operation
-        self.total_A  = 0.0
-        self.total_hu = 0.0
-        self.total_cu = 0.0
+        # self.total_A  = 0.0
+        # self.total_Q_hu = 0.0
+        # self.total_Q_cu = 0.0
 
         # basic info
         self.n_hs    = int(case_data["info"]["hs"])

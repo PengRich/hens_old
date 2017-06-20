@@ -10,7 +10,7 @@ class WithoutSplit(object):
         self.hens  = HenBase.init_case(case_name, n_st)
         self.T_OUT = {str(i+1): None for i in range(self.hens.n_hs+self.hens.n_cs)}
 
-    def update_tac(self):
+    def _update_tac(self):
 
         self.hens.result._init()
         for i in range(self.hens.n_hs):
@@ -29,7 +29,7 @@ class WithoutSplit(object):
             self.hens.result.cost_hu += self.hens.terminals[ID].utility.cost_hu
             self.hens.result.cost_cu += self.hens.terminals[ID].utility.cost_cu
 
-    def update_exchanger_temperature(self):
+    def _update_exchanger_temperature(self):
 
         for i in range(self.hens.n_hs):
             h_id = str(i+1)
@@ -37,7 +37,7 @@ class WithoutSplit(object):
             ids   = self.hens.hloc[h_id]
             he_id = int(ids[0])
             self.hens.exchangers[ids[0]].Q   = self.hens.Qs[he_id]
-            self.hens.exchangers[ids[0]].sta = True
+            # self.hens.exchangers[ids[0]].sta = True
             if self.hens.Qs[he_id] > 0:
                 self.hens.exchangers[ids[0]].T_hin  = self.hens.hot_streams[h_id].T_in
                 self.hens.exchangers[ids[0]].T_hout = self.hens.exchangers[ids[0]].T_hin - self.hens.Qs[he_id] / self.hens.hot_streams[h_id].HCpF
@@ -48,7 +48,7 @@ class WithoutSplit(object):
             for j, ID in enumerate(ids[1:]):
                 he_id = int(ID)
                 self.hens.exchangers[ID].Q   = self.hens.Qs[he_id]
-                self.hens.exchangers[ID].sta = True
+                # self.hens.exchangers[ID].sta = True
                 if self.hens.Qs[he_id] > 0:
                     self.hens.exchangers[ID].T_hin  = self.hens.exchangers[ids[j]].T_hout
                     self.hens.exchangers[ID].T_hout = self.hens.exchangers[ID].T_hin - self.hens.Qs[he_id] / self.hens.hot_streams[h_id].HCpF
@@ -77,7 +77,7 @@ class WithoutSplit(object):
                     self.hens.exchangers[ID].T_hin  = self.hens.exchangers[ids[j]].T_cout
                     self.hens.exchangers[ID].T_hout = self.hens.exchangers[ID].T_cin + self.hens.Qs[he_id] / self.hens.cold_streams[c_id].HCpF
 
-    def update_terminal_utility(self):
+    def _update_terminal_utility(self):
 
         self.hens.init_utility_loc()
 
@@ -120,7 +120,7 @@ class WithoutSplit(object):
 
         return str(h_id), str(c_id)
 
-    def update_topo(self, Qs):
+    def _update_topo(self, Qs):
 
         self.hens.Qs   = Qs[:]
         self.hens.stas = [1 if abs(Q) > 1.e-3 else 0 for Q in Qs]
@@ -141,14 +141,14 @@ class WithoutSplit(object):
 
     def tac(self, Qs=None):
 
-        # self.hens.total_hu = 0.0
-        # self.hens.total_cu = 0.0
+        # self.hens.total_Q_hu = 0.0
+        # self.hens.total_Q_cu = 0.0
         # self.hens.total_A  = 0.0
 
-        if Qs: self.update_topo(Qs)
-        self.update_exchanger_temperature()
-        self.update_terminal_utility()
-        self.update_tac()
+        if Qs: self._update_topo(Qs)
+        self._update_exchanger_temperature()
+        self._update_terminal_utility()
+        self._update_tac()
 
         return self.hens.result.tac
 

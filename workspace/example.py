@@ -3,6 +3,7 @@ import os
 import sys
 sys.path.append("./")
 from py.simulator.without_split import WithoutSplit as wos
+from py.optimizer.rwce import RWCE
 
 def example1(case_name="9sp1", n_st=3):
 
@@ -68,5 +69,9 @@ def example2(case_name="10sp2", n_st=4):
     exit()
 
 
+def test_rwce():
+    RWCE("10sp2", 4).multi_threads(3)
+
+
 if __name__ == "__main__":
-    example2()
+    test_rwce()
