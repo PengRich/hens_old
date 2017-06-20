@@ -70,7 +70,7 @@ def example2(case_name="10sp2", n_st=4):
 
 
 def test_rwce():
-    RWCE("10sp2", 4).multi_threads(3)
+    RWCE("10sp2", 4).multi_threads(4)
 
 
 if __name__ == "__main__":

@@ -5,9 +5,11 @@ from threading import currentThread
 from threading import Thread
 from datetime import datetime
 import random
+import os
 # import numpy as np
 
 from py.simulator.without_split import WithoutSplit
+from py.utils import Util
 
 
 class RWCE():
@@ -23,8 +25,13 @@ class RWCE():
         self.case = case_name
         self.n_st = n_st
         self.lock = Lock
+        self.simulator = WithoutSplit(self.case, self.n_st)
 
-    def multi_threads(self, num_threads=20):
+        result        = {"tac": [], "Qs": []}
+        self.filename = os.path.join("py", "solution.json")
+        Util.write_json(self.filename, result)
+
+    def multi_threads(self, num_threads=10):
 
         for i in range(num_threads):
             print "Thread, %s", str(i)
@@ -55,7 +62,7 @@ class RWCE():
                 tac_min = tac
                 Qs_min  = Qs2[:]
                 num_hes = len([Q for Q in Qs_min[1:] if abs(Q) > 1.e-3])
-                if ite > 1.e5: print currentThread(), ite, tac_min, num_hes
+                if ite > 5.e4: print currentThread(), ite, tac_min, num_hes
                 rej_ite = 0
             else:
                 rej_ite += 1
@@ -66,9 +73,18 @@ class RWCE():
                 Qs0  = Qs2[:]
                 tac0 = tac
 
-        if wakeup: threading.Timer(5, self.single_thread, [r, True]).start()
+        with self.lock:
+            self.record_solution(tac_min, Qs_min)
+        if wakeup: Timer(5, self.single_thread, [r, True]).start()
 
-        return tac_min, Qs_min
+    def record_solution(tac_min, Qs_min):
+
+        result = Util.read_json(self.filename)
+
+        if not result["tac"] or tac_min < result["tac"]:
+            result = {"tac": tac_min, "Q": Qs_min[1:]}
+            Util.write_json(self.filename, result)
+
 
 
 if __name__ == "__main__":
