@@ -1,5 +1,4 @@
 module simulator_without_split
-  use hens_def
   use flexible_utility_base
   implicit none
 

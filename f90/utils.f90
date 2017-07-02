@@ -30,19 +30,27 @@ end module logger
 ! simplified penalty function 
 !********************************
 module penalty
-  implicit none
-  real(kind=8), parameter :: pen_factor=1.d7
-  real(kind=8), public    :: global_pen = 0.d0
-  contains
+    implicit none
+    real(kind=8) :: global_pen = 0.d0
+    contains
 
-    subroutine add_penalty(excess)
+        subroutine add_penalty(excess)
+            real(kind=8), intent(in) :: excess
+            real(kind=8) :: factor
 
-      real(kind=8), intent(in) :: excess
+            factor     = 1.d7
+            global_pen = global_pen + 0.5d0*factor*(max(0.d0, -excess+1.d0)**2.d0)
+            return 
+        end subroutine add_penalty
 
-      global_pen = global_pen + 0.5d0*pen_factor*(max(0.d0, -excess+1.d0)**2.d0)
+        real(kind=8) function mpen(excess)
+            real(kind=8), intent(in) :: excess
+            real(kind=8) :: factor
 
-    end subroutine add_penalty
-
+            factor = 1.d7
+            mpen   = 0.5d0*factor*(max(0.d0, -excess+1.d0)**2.d0)
+            return 
+        end function mpen 
 end module penalty
 
 

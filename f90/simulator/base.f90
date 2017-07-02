@@ -1,41 +1,4 @@
 !********************************
-! initilization functions 
-!********************************
-! module hens_init
-!   use hens_def
-!   use logger
-!   implicit none
-!   contains
-!     subroutine init_case()
-!       implicit none
-! 
-!       select case(case_name)
-! 
-!         case("case_9sp1") 
-!           include "case_9sp1.inc"
-! 
-!         case("case_10sp2")
-!           include "case_10sp2.inc"
-! 
-!         case default
-!           call log_char("Warning: Input wrong case parameters!")
-! 
-!       end select
-! 
-!       return
-!     end subroutine init_case
-!     
-!   subroutine init_value()
-!     implicit none
-! 
-!     global_pen = 0.d0
-!     Q_hu = 0.d0
-!     Q_cu = 0.d0
-!   end subroutine init_value
-! 
-! end module hens_init
-
-!********************************
 ! thermal calculation of single heat exchanger
 !********************************
 module heat_exchanger_calculation
@@ -64,8 +27,8 @@ end module heat_exchanger_calculation
 ! thermal calculation of flexible utility 
 !********************************
 module flexible_utility_base
+  use hens_def
   use heat_exchanger_calculation
-  use hen
   use penalty
   implicit none
 
