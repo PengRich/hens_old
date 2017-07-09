@@ -61,11 +61,11 @@ module random_numbers
   implicit none
   real(kind=8)  :: rn=0.1d0
   contains
-    function rand_hit()
+    real(kind=8) function rand_hit()
       implicit none
 	  real(kind=8) :: ax, am, ac
-	  real(kind=8) :: rand_hit
-      if(abs(rn-0.0d0).gt.1.d-6) then
+
+      if(rn .ne. 0.0d0) then
         ac = dble(16807)
         rn = ac * rn
         rn = rn - dble(idint(rn))
