@@ -92,3 +92,4 @@ include/
 lib/
 pip-selfcheck.json
 .DS_store
+debug/
